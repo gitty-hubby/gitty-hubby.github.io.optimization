@@ -503,8 +503,9 @@ function updatePositions() {
   window.performance.mark("mark_start_frame");
 
   var items = document.querySelectorAll('.mover');
+  var bodyOffset = document.body.scrollTop;     
   for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    var phase = Math.sin((bodyOffset / 1250) + (i % 5));
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
 
@@ -523,10 +524,19 @@ window.addEventListener('scroll', updatePositions);
 
 // Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {
+  // setting window height so we can limit amount of bg pizzas
+  var winHeight = window.innerHeight + 256;    
   var cols = 8;
   var s = 256;
   for (var i = 0; i < 200; i++) {
     var elem = document.createElement('img');
+    // current elem y pos
+    var y = Math.floor(i / cols) * s;
+    // breaking loop if bg pizza outside the view (window)
+    if (y > winHeight) {
+        break;
+    }  
+    
     elem.className = 'mover';
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
