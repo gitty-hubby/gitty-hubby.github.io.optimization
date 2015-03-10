@@ -33,6 +33,12 @@ form {
   position: fixed;
   width: 256px;
   z-index: -1;
+  /* hack to enable GPU acceleration 
+    and have element render on its own 
+    composite layer */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transform: trnslated3d(0,0,0);
 }
 
 .randomPizzaContainer {

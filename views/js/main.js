@@ -450,10 +450,14 @@ var resizePizzas = function(size) {
 
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+    // setting vars outside loop to reduce DOM calls.  
+    var elem =  document.getElementsByClassName("randomPizzaContainer")[0], 
+        dx = determineDx(elem, size),
+        newwidth = (elem.offsetWidth + dx) + 'px',  
+        len = document.getElementsByClassName("randomPizzaContainer").length;   
+    // changed to getElementsByClassName since it's faster than querySelectorAll
+    for (var i = 0; i < len; i++) {
+        document.getElementsByClassName("randomPizzaContainer")[i].style.width = newwidth;
     }
   }
 
@@ -502,11 +506,22 @@ function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var items = document.querySelectorAll('.mover');
-  var bodyOffset = document.body.scrollTop;     
-  for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((bodyOffset / 1250) + (i % 5));
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+  // changed from querySelectorAll to getElementsByClassName
+     
+  //var items = document.getElementsByClassName('mover'),
+    var bodyOffset = document.body.scrollTop / 1250;     
+  
+  for (var i = 0; i < arrPizzas.length; i++) {
+    //var phase = Math.sin(bodyOffset + (i % 5));
+    //arrPizzas[i].style.left = arrPizzas[i].basicLeft + 100 * phase + 'px';
+    
+    // using CSS to asign x pos since it's much faster  
+    var transform = "translateX(" + 100 * Math.sin(bodyOffset + (i % 5)) + "px)";
+        arrPizzas[i].style.webkitTransform = transform;
+        arrPizzas[i].style.MozTransform = transform;
+        arrPizzas[i].style.msTransform = transform;
+        arrPizzas[i].style.OTransform = transform;
+        arrPizzas[i].style.transform = transform;  
   }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
@@ -522,6 +537,11 @@ function updatePositions() {
 // runs updatePositions on scroll
 window.addEventListener('scroll', updatePositions);
 
+// create array to store pizzas refference 
+
+var arrPizzas = [];
+
+
 // Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {
   // setting window height so we can limit amount of bg pizzas
@@ -532,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var elem = document.createElement('img');
     // current elem y pos
     var y = Math.floor(i / cols) * s;
-    // breaking loop if bg pizza outside the view (window)
+    // break loop if background pizzas are outside the view (window)
     if (y > winHeight) {
         break;
     }  
@@ -541,9 +561,14 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
     elem.style.width = "73.333px";
-    elem.basicLeft = (i % cols) * s;
+    //elem.basicLeft = (i % cols) * s;
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
-    document.querySelector("#movingPizzas1").appendChild(elem);
+    // added initial X style since we are not utilizing basicLeft
+    elem.style.left = (i % cols) * s + 'px';
+    // changed querySelector to getElementById  
+    document.getElementById("movingPizzas1").appendChild(elem);
+    // also add to arrPizzas
+    arrPizzas.push(elem);  
   }
   updatePositions();
 });
